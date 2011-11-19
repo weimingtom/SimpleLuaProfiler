@@ -315,9 +315,16 @@ public class GUIMain {
 	if(lines != null && lines.size() > 0) {
 	    String str = (String) lines.get(lines.size() - 1);
 	    String[] result = str.split(":");
-	    if(result != null && result.length == 2) {
-		String lineno = result[1];
-		return Integer.parseInt(lineno) - 1;
+	    if(result != null) {
+		if (result.length == 2) {
+		    String lineno = result[1];
+		    return Integer.parseInt(lineno) - 1;
+		}
+		if (result.length == 3) {
+		    //FIXME: Windows C:\\
+		    String lineno = result[2];
+		    return Integer.parseInt(lineno) - 1;
+		}
 	    }
 	}
 	return 0;
