@@ -9,6 +9,11 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
@@ -67,15 +72,46 @@ public class GUIMain {
 	shell.setLayout(new FormLayout());
 	shell.setImage(new Image(Display.getCurrent(), GUIMain.class
 		.getResourceAsStream(ICON_NAME)));
-	tabFolder = new CTabFolder(shell, SWT.NONE);
-	tabFolder.setLayoutData(new GridData(1808));
-
-	sourceViewItem = new CTabItem(tabFolder, 0);
+	tabFolder = new CTabFolder(shell, SWT.TOP | SWT.BORDER/*SWT.NONE*/);
+	tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH/*1808*/));
+	
+	//see http://www.blogjava.net/Javawind/archive/2008/06/06/206397.html
+	//see http://www.ibm.com/developerworks/cn/education/opensource/os-eclipse-rcp1/index.html#resources
+	tabFolder.setTabHeight(25);
+	tabFolder.setSimple(false);
+	tabFolder.setBorderVisible(true);
+	int colorCount = 3; 
+	Color[] colors = new Color[colorCount]; 
+	colors[0] = display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND); 
+	colors[1] = display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT); 
+	colors[2] = colors[0]; 
+	int[] percents = new int[colorCount - 1]; 
+	percents[0] = 4; 
+	percents[1] = 60; 
+	tabFolder.setSelectionBackground(colors, percents, true); 
+	tabFolder.setSelectionForeground(display.getSystemColor(SWT.COLOR_TITLE_FOREGROUND));
+	//tabFolder.setSelectionForeground(display.getSystemColor(SWT.COLOR_WHITE));
+	//tabFolder.setSelectionBackground(display.getSystemColor(SWT.COLOR_BLUE));
+	tabFolder.addFocusListener(new FocusAdapter() {
+		@Override
+		public void focusGained(FocusEvent e) {
+			for (int i = 0; i < tabFolder.getItemCount(); i++) {
+				if (tabFolder.getSelection() == tabFolder.getItem(i)) {
+					if (tabFolder.getItem(i) != null && 
+						tabFolder.getItem(i).getControl() != null) {
+						tabFolder.getItem(i).getControl().forceFocus();
+					}
+	        	}
+			}
+		}
+    });
+	
+	sourceViewItem = new CTabItem(tabFolder, SWT.NONE/*SWT.CLOSE*/);
 	sourceViewItem.setText("Sources");
 	sourceViewTab = new SourceViewTab(tabFolder);
 	sourceViewItem.setControl(sourceViewTab);
 
-	logItem = new CTabItem(tabFolder, 0);
+	logItem = new CTabItem(tabFolder, SWT.NONE/*SWT.CLOSE*/);
 	logTab = new LogTab(tabFolder);
 	logItem.setControl(logTab);
 	logItem.setText("Logs");
@@ -214,7 +250,7 @@ public class GUIMain {
 	    final Display display = Display.getCurrent();
 	    if (display != null) {
 		final MessageBox messageBox = new MessageBox(
-			new Shell(display), 33);
+			new Shell(display),  SWT.OK | SWT.ICON_ERROR /*33*/);
 		messageBox.setText("Error");
 		messageBox.setMessage(e.toString());
 		messageBox.open();
